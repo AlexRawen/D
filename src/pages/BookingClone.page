@@ -1,0 +1,374 @@
+<!--*
+* Name          : BookingClone.page
+* Created By    : Fedor Golovanov (fgolovanov@newmarketinc.com)
+* Created Date  : Jul 20th 2017
+* Description   : Interface for the booking clone functionality. Uses SLDS styles.
+* Dependencies  : BookingClone.cls
+* Operations    : Calls remote actions to invoke clone process.
+*-->
+
+<apex:page controller="BookingClone" showHeader="false" sidebar="false" id="mainWindow" title="Booking Clone">
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <apex:slds />
+        <link rel="stylesheet" href="{!URLFOR($Resource.nihrm__jQuery, 'css/start/jquery.ui.all.css')}" />
+        <script type="text/javascript" src="{!URLFOR($Resource.nihrm__jQuery, 'js/jquery-1.7.2.js')}" />
+        <script type="text/javascript" src="{!URLFOR($Resource.nihrm__jQuery, 'ui/jquery.ui.core.js')}" />
+        <script type="text/javascript" src="{!URLFOR($Resource.nihrm__jQuery, 'ui/jquery.ui.widget.js')}" />
+        <script type="text/javascript" src="{!URLFOR($Resource.nihrm__jQuery, 'ui/jquery.ui.progressbar.js')}" />
+        <script type="text/javascript">
+            var recordsBundle = [], bookingClones = [], clonedIds = [], oClonesIdsJSON = [], cloneErrors = [];
+            var clonesserialized = 0, clonesdeserialized = 0;
+            var currentclone, errorOccured;
+            var originalBookingArrivalConverted, clonesName;
+
+            function startCloning(clonesJSON) {
+
+                $('[id$=clonemessagetext]').html('Cloning bookings with events...');
+                clonedIds = []; cloneErrors = [];
+                bookingClones = clonesJSON;
+                clonesName = '{!clonesName}';
+                oClonesIdsJSON = '{!omitClonesIdsJSON}';
+
+                var originalBookingArrival = new Date('{!booking.nihrm__CutoffDate__c}');
+                originalBookingArrivalConverted =  originalBookingArrival.getUTCFullYear() + '-' + (originalBookingArrival.getUTCMonth() + 1) + '-' + originalBookingArrival.getUTCDate();
+
+                hideErrors();
+                hideButtons();
+                showProgress();
+
+                for (i = 0; i < clonesJSON.length; i++) {
+                    Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.BookingClone.serialize}',
+                        JSON.stringify(new Array(clonesJSON[i].booking.Id)),
+                        serializeCallback, {
+                            escape: false,
+                            buffer: false,
+                            timeout: 120000
+                        });
+                }
+                
+            }
+
+            function serializeCallback(result, event) {
+                
+                var recordSetBundle;
+
+                if (result) {
+                    currentclone = bookingClones[clonesserialized];
+                    clonesserialized++;
+                    recordsBundle = JSON.parse(result);
+                    deserializeCallout(recordsBundle);
+                } else {
+                    restoreInits();
+                    hideProgress();
+                    showErrors('<b>Generic cloning error occured on records serialize. Please contact your administrator.</b>');
+                    showButtons();
+                } 
+                
+            }
+
+            function deserializeCallout(records) {
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.BookingClone.deserialize}',
+                    JSON.stringify(records),
+                    originalBookingArrivalConverted,
+                    bookingClones[clonesserialized - 1].booking.nihrm__CutoffDate__c,
+                    bookingClones[clonesserialized - 1].booking.nihrm__Location__c,
+                    clonesName,
+                    oClonesIdsJSON,
+                    deserializeCallback, {
+                        escape: false,
+                        buffer: false,
+                        timeout: 120000
+                    });
+            }
+
+            function deserializeCallback(result, event) {
+                if(result){
+                    if(result.results == 'failure'){
+                        cloneErrors = cloneErrors.concat(result.exceptions);
+                    }
+                    clonesdeserialized++;
+                    clonedIds = clonedIds.concat(result.records);
+                    if(clonesserialized == clonesdeserialized && clonesdeserialized == bookingClones.length){
+                        setRollupsActivated();
+                        if(cloneErrors.length > 0){
+                            rollback();
+                        }else{
+                            $('[id$=clonemessagetext]').html('Cloning is finished redirecting to the results...');
+                            createResultTable();
+                        }
+                        restoreInits();
+                    }
+                }    
+            }
+
+            function rollback() {
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.BookingClone.rollbackCloned}',
+                    JSON.stringify(clonedIds),
+                    rollbackCallback, {
+                        escape: false
+                    });
+            }
+
+            function rollbackCallback(result, event) {     
+                hideProgress();
+                showErrors(cloneErrors.join());
+                showButtons();
+            }
+
+            function createResultTable() {
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.BookingClone.createResultsTable}',
+                    JSON.stringify(clonedIds),
+                    createResultTableCallback, {
+                        escape: false
+                    });
+            }
+
+            function setRollupsActivated() {
+                $('[id$=clonemessagetext]').html('Activating Rollups...');
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.BookingClone.setRollupsActivated}',
+                    JSON.stringify(clonedIds),
+                    setRollupsActivatedCallback, {
+                        escape: false,
+                        buffer: true,
+                        timeout: 120000
+                    });
+            }
+
+            function setRollupsActivatedCallback(result, event) {     
+                if(result){
+                    if(result.includes('error')){
+                       cloneErrors.concat(result); 
+                    }
+                }    
+            }
+
+            function createResultTableCallback(result, event) {     
+                hideProgress();
+                $('[id$=cloneresult]').html(result);
+                $('[id$=cloneresult]').show();
+                $('[id$=cancelButton]').prop('value', 'Close');
+                showButtons();
+            }
+
+            function restoreInits(){
+                clonesserialized = 0;
+                clonesdeserialized = 0;
+            }
+
+            function showErrors(message){
+                $('[id$=errors]').slideDown();
+                $('[id$=errorMessage]').html(message);
+            }
+
+            function hideErrors(){
+                $('[id$=errors]').hide();
+            }
+
+            function showProgress(){
+                $('[id$=progress]').slideDown();
+                $('[id$=clonemessage]').show();
+            }
+
+            function hideProgress(){
+                $('[id$=progress]').hide();;
+                $('[id$=clonemessage]').hide();
+            }
+
+            function showButtons(){
+                $('[id$=cloneButton]').show();
+                $('[id$=moreButton]').show();
+                $('[id$=cancelButton]').show();
+                toogleButtons(false);
+                checkAddMore({!clones.size});
+            }
+
+            function hideButtons(){
+                $('[id$=cloneButton]').hide();
+                $('[id$=moreButton]').hide();
+                $('[id$=cancelButton]').hide();
+            }
+
+            function toogleButtons(state){
+                $('[id$=cloneButton]').prop('disabled', state);
+                $('[id$=moreButton]').prop('disabled', state);
+                $('[id$=cancelButton]').prop('disabled', state);
+            }
+
+            function redirectTo(path) {
+                setTimeout(function() {
+                    parent.location.href = '/' + path;
+                }, 2000);
+            }
+
+            function checkAddMore(numberOfClones){
+                if(numberOfClones >= {!NUM_CLONES_TO_ADD}){
+                   $('[id$=moreButton]').prop('disabled', true); 
+                }
+            }
+        </script>
+
+        <style type="text/css">
+            .slds-form-element__control .dateInput{
+                display: block;
+                position: relative;
+            }
+            .slds-form-element__control .dateFormat{
+                position: absolute;
+                right: 0.5rem;
+                top: 50%;
+                margin-top: -0.5rem;
+            }
+            a.slds-input.fixlookup {
+                position: absolute;
+                right: 6px;
+                width: auto;
+                border: none;
+                background: none !important;
+                top: 0.3rem;
+                height: 22px !important;
+                padding-left: 1px;
+                box-shadow: none !important;
+                padding: 0;
+                min-height: initial;
+            }
+        </style>
+
+        <apex:form id="theForm">
+
+            <div class="slds-notify_container slds-is-relative" style="z-index: 5">
+                <div style="background-color:light-grey" class="slds-notify slds-notify--alert slds-theme--alert-texture" role="alert">
+                    <span class="slds-assistive-text">Info</span>
+                    <h1><b>{!$Label.CloneBookings}</b></h1>
+                </div>
+            </div>
+
+            <div class="slds-m-vertical--x-small"></div>
+            
+            <apex:outputPanel id="theGrid">
+                <div class="slds-grid slds-wrap">
+                    
+                    <div class="slds-p-horizontal_small slds-size_1-of-6">
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="text-input-id-1">&nbsp;</label>
+                        </div>
+                    </div>
+
+                    <div class="slds-p-horizontal_small slds-size_2-of-6">
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="text-input-id-1">Select Arrival Date for new booking</label>
+                        </div>
+                    </div>
+                    <div class="slds-p-horizontal_small slds-size_2-of-6">
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="text-input-id-1">Select Location for new booking</label>
+                        </div>
+                    </div>
+                    <div class="slds-p-horizontal_small slds-size_1-of-6">
+                        <div class="slds-form-element">
+                            <label class="slds-form-element__label" for="text-input-id-1">&nbsp;</label>
+                        </div>
+                    </div>
+                    
+                    <!-- repeat the booking clone instance -->
+                   
+                    <apex:repeat var="instance" value="{!clones}" >
+                        
+                        <div class="slds-p-horizontal_small slds-size_1-of-6">
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                   &nbsp;
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- arrival column -->
+                        <div class="slds-p-horizontal_small slds-size_2-of-6">
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <apex:inputField value="{!instance.booking.nihrm__CutoffDate__c}" id="BArrival" styleClass="slds-input"></apex:inputField>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- location column -->
+                        <div class="slds-p-horizontal_small slds-size_2-of-6">
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <apex:inputField value="{!instance.booking.nihrm__Location__c}" id="BProperty" styleClass="slds-input fixlookup"></apex:inputField>
+                                </div>    
+                            </div>
+                        </div>
+
+                        <div class="slds-p-horizontal_small slds-size_1-of-6">
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                   &nbsp;
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- padding between lines column -->
+                        <div class="slds-m-vertical--x-large"></div>
+
+                    </apex:repeat>
+
+                </div>
+            </apex:outputPanel>
+            
+            <!--Progress Bar-->
+            <div id="progress" class="slds-is-relative slds-hide" style="height:6rem;">
+                <div role="status" class="slds-spinner slds-spinner_brand slds-spinner_large">
+                    <span class="slds-assistive-text">Loading</span>
+                    <div class="slds-spinner__dot-a"></div>
+                    <div class="slds-spinner__dot-b"></div>
+                </div>
+            </div>
+
+            <!--Spinner Messages And Erorrs-->
+            <div class="slds-text-align_center color-text-link-hover slds-text-color_weak slds-hide" id="clonemessage"><p id="clonemessagetext"></p></div>
+            <div class="slds-text-align_center color-text-link-hover slds-text-color_weak slds-hide" id="clonefinishmessage"><p id="resultMessage"></p></div>
+            <div id="errors" class="slds-p-top_x-small slds-inline_icon_text slds-grid slds-inline_icon_text--error slds-hide">
+                <div class="slds-p-left_medium slds-col slds-align-middle slds-text-align_left slds-text-color_error">
+                    <p>Review the following errors:</p>
+                    <p id="errorMessage"></p>
+                </div>
+            </div>
+
+            <!--Buttons-->
+            <div class="slds-align_absolute-center">
+                <apex:actionFunction name="resetCloneBooking" action="{!resetCloneBookings}" rerender="startCloning"/>
+                <apex:commandButton styleclass="slds-button slds-button--neutral" id="cloneButton" value="Clone" action="{!cloneBookings}" onclick="toogleButtons(true)" oncomplete="resetCloneBooking();" rerender="theForm" />
+                <apex:commandButton styleclass="slds-button slds-button--neutral" id="moreButton" value="Add More" action="{!addMore}" oncomplete="checkAddMore({!clones.size})" rerender="theGrid">
+                    <apex:param name="newClones" value="1" assignTo="{!numOfClones}"/>
+                </apex:commandButton>
+                <apex:commandButton styleclass="slds-button slds-button--neutral" id="cancelButton" value="Cancel" action="{!cancel}" />
+            </div>
+
+             <!--Clone Results-->
+            <div class="slds-text-align_center slds-hide" id="cloneresult"></div>
+
+            <!-- padding on the bottom of the screen -->
+            <div class="slds-m-vertical--x-large"></div>
+
+            <!--Function to start cloning process-->
+            <apex:outputPanel id="startCloning">
+                <apex:outputText escape="false" rendered="{!startCloning}">
+                    <script type="text/javascript">
+
+                        var clonesJSON = '{!clonesJSON}';
+                        
+                        if(clonesJSON){
+                            startCloning(JSON.parse(clonesJSON));
+                        }else{
+                            hideProgress();
+                            showErrors('<b>There are no valid clone records. Please make sure that you populate the location and all new arrival dates are in the future.<b>');
+                            showButtons();
+                        }
+
+                    </script>
+                </apex:outputText>
+            </apex:outputPanel>
+
+        </apex:form>
+    </html>
+</apex:page>
