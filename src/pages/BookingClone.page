@@ -247,28 +247,23 @@
             <apex:outputPanel id="theGrid">
                 <div class="slds-grid slds-wrap">
                     
-                    <div class="slds-p-horizontal_small slds-size_1-of-7">
+                    <div class="slds-p-horizontal_small slds-size_1-of-6">
                         <div class="slds-form-element">
                             <label class="slds-form-element__label" for="text-input-id-1">&nbsp;</label>
                         </div>
                     </div>
 
-                    <div class="slds-p-horizontal_small slds-size_2-of-7">
+                    <div class="slds-p-horizontal_small slds-size_2-of-6">
                         <div class="slds-form-element">
                             <label class="slds-form-element__label" for="text-input-id-1">Select Arrival Date for new booking</label>
                         </div>
                     </div>
-                    <div class="slds-p-horizontal_small slds-size_2-of-7">
+                    <div class="slds-p-horizontal_small slds-size_2-of-6">
                         <div class="slds-form-element">
                             <label class="slds-form-element__label" for="text-input-id-1">Select Location for new booking</label>
                         </div>
                     </div>
-                    <div class="slds-p-horizontal_small slds-size_1-of-7">
-                        <div class="slds-form-element">
-                            <label class="slds-form-element__label" for="text-input-id-1">&nbsp;</label>
-                        </div>
-                    </div>
-                    <div class="slds-p-horizontal_small slds-size_1-of-7">
+                    <div class="slds-p-horizontal_small slds-size_1-of-6">
                         <div class="slds-form-element">
                             <label class="slds-form-element__label" for="text-input-id-1">&nbsp;</label>
                         </div>
@@ -278,7 +273,7 @@
                    
                     <apex:repeat var="instance" value="{!clones}" >
                         
-                        <div class="slds-p-horizontal_small slds-size_1-of-7">
+                        <div class="slds-p-horizontal_small slds-size_1-of-6">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
                                    &nbsp;
@@ -287,7 +282,7 @@
                         </div>
 
                         <!-- arrival column -->
-                        <div class="slds-p-horizontal_small slds-size_2-of-7">
+                        <div class="slds-p-horizontal_small slds-size_2-of-6">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
                                     <apex:inputField value="{!instance.booking.nihrm__CutoffDate__c}" id="BArrival" styleClass="slds-input"></apex:inputField>
@@ -296,30 +291,18 @@
                         </div>
 
                         <!-- location column -->
-                        <div class="slds-p-horizontal_small slds-size_2-of-7">
+                        <div class="slds-p-horizontal_small slds-size_2-of-6">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
                                     <apex:inputField value="{!instance.booking.nihrm__Location__c}" id="BProperty" styleClass="slds-input fixlookup"></apex:inputField>
                                 </div>    
                             </div>
                         </div>
-                        <!--mine colunm for checkbox-->
-                        <div class="slds-p-horizontal_small slds-size_1-of-7">
-                            <div class="slds-form-element">
-                                <div class="slds-form-element__control">
-                                    <apex:inputCheckbox value="{!instance.checkBoxForInquiry}">
-                                        <apex:actionSupport event="onclick" rerender="theGrid"/>
-                                    </apex:inputCheckbox>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="slds-p-horizontal_small slds-size_1-of-7">
+                        <div class="slds-p-horizontal_small slds-size_1-of-6">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
-                                   <apex:outputText value="{!instance.checkBoxForInquiry}"/>
-                                   <!--old 
-                                   &nbsp; -->
+                                   &nbsp;
                                 </div>
                             </div>
                         </div>
@@ -351,9 +334,6 @@
                 </div>
             </div>
 
-            <div>
-                <apex:outputText id="msgPanel" value="{!msg}"/>
-            </div>
             <!--Buttons-->
             <div class="slds-align_absolute-center">
                 <apex:actionFunction name="resetCloneBooking" action="{!resetCloneBookings}" rerender="startCloning"/>

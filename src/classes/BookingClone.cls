@@ -10,18 +10,6 @@
 */
 
 public with sharing class BookingClone {
-
-    public Boolean checkBoxForInquiry {get;
-        set{
-            if(value){
-                msg = 'setted to TRUE';
-            } else {
-                msg = 'setted to FALSE';
-            }
-        }
-    }
-
-    public String msg{get;set;}
     
     //The number of new clone instancies to add to the list when the user clicks 'Add More'
     public Integer numOfClones{get;set{numOfClones = value;}}
@@ -93,8 +81,7 @@ public with sharing class BookingClone {
 
     //Set page's initail values such as number of clone instancies, booking to clone
     public BookingClone() 
-    {   
-        msg = 'asdfqwer';
+    {
         try {
             Id bookingId = ApexPages.currentPage().getParameters().get('id');
 
@@ -154,11 +141,9 @@ public with sharing class BookingClone {
 
     public class BookingCloneInstance
     {
-        public boolean checkBoxForInquiry {get;set;}
         public nihrm__Booking__c booking{get; set;}
 
         public BookingCloneInstance(nihrm__Booking__c booking){
-            checkBoxForInquiry = false;
             this.booking = booking;  
         }
     }
