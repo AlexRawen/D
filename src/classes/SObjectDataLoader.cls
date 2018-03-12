@@ -429,6 +429,7 @@ public with sharing class SObjectDataLoader
     public static String clonesName;
     public static nihrm__Location__c clonedLocation;
     public static Set<Id> omitClonesIdsJSON;
+    public static Boolean isInquiryShouldBeCloned;
 
     public static sObject flushFields(sObject sObj){
         
@@ -436,9 +437,11 @@ public with sharing class SObjectDataLoader
         
         if(fieldsCopyByObject.containsKey(objName)){
 
+            // чем Global отличается от не Global
+            // т.е. почему нельзя SObjectType objType = sObj.getSObjectType();
             SObjectType objType = Schema.getGlobalDescribe().get(objName);
             Map<String, Schema.SObjectField> describeMap = objType.getDescribe().fields.getMap();
-
+            //пробегает по всем полям sObj
             for(String fieldName : describeMap.keySet()) {
                 if(describeMap.get(fieldName).getDescribe().isUpdateable()) {
                     
@@ -475,7 +478,8 @@ public with sharing class SObjectDataLoader
             if(objName == 'nihrm__bookingevent__c'){
                 sObj.put('nihrm__functionroom__c', clonedLocation.nihrm__UnassignedFunctionRoom__c);
             }
-
+            //вот это должно срабатывать только если стоит галочка
+            //if(objName == 'nihrm__booking__c' && isInquiryShouldBeCloned){
             if(objName == 'nihrm__booking__c'){
                 sObj.put('nihrm__inquiry__c', createPrimaryInquiry((nihrm__Booking__c)sObj));
             }
@@ -1133,7 +1137,7 @@ public with sharing class SObjectDataLoader
             
             // Get all of the record types that are included
             recordTypeMap = new Map<Id, RecordType>([SELECT Id, Description, DeveloperName, Name, SobjectType FROM RecordType WHERE Id=:recordTypeIds]);
-                        
+            
         }       
     }
     
@@ -1144,7 +1148,7 @@ public with sharing class SObjectDataLoader
     {
         // Groups records by type
         public String ObjectType;
-        public List<SObject> Records;   
+        public List<SObject> Records;
     }
     
     /**

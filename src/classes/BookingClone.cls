@@ -10,18 +10,6 @@
 */
 
 public with sharing class BookingClone {
-
-    public Boolean checkBoxForInquiry {get;
-        set{
-            if(value){
-                msg = 'setted to TRUE';
-            } else {
-                msg = 'setted to FALSE';
-            }
-        }
-    }
-
-    public String msg{get;set;}
     
     //The number of new clone instancies to add to the list when the user clicks 'Add More'
     public Integer numOfClones{get;set{numOfClones = value;}}
@@ -94,7 +82,6 @@ public with sharing class BookingClone {
     //Set page's initail values such as number of clone instancies, booking to clone
     public BookingClone() 
     {   
-        msg = 'asdfqwer';
         try {
             Id bookingId = ApexPages.currentPage().getParameters().get('id');
 
@@ -152,13 +139,14 @@ public with sharing class BookingClone {
         }
     }
 
-    public class BookingCloneInstance
-    {
-        public boolean checkBoxForInquiry {get;set;}
+    public class BookingCloneInstance{
+        //mcode
+        public boolean isInquiryShouldBeCloned{get; set;}
         public nihrm__Booking__c booking{get; set;}
 
         public BookingCloneInstance(nihrm__Booking__c booking){
-            checkBoxForInquiry = false;
+            //mcode
+            isInquiryShouldBeCloned = false;
             this.booking = booking;  
         }
     }
@@ -193,12 +181,13 @@ public with sharing class BookingClone {
     @RemoteAction
     public static SObjectDataLoader.DeserializeResponse deserialize(String recordsAsJSON, String originalArrival, 
                                                                     String newArrival, String newPropertyId, 
-                                                                    String clonesName, String omitClonesIds)
+                                                                    String clonesName, String omitClonesIds, String isInquiryShouldBeCloned)
     {
         SObjectDataLoader.clonesName = clonesName;
         SObjectDataLoader.omitClonesIdsJSON = (Set<Id>)JSON.deserialize(omitClonesIds, Set<Id>.class);
         SObjectDataLoader.shiftDays = Date.ValueOf(originalArrival).daysBetween(Date.ValueOf(newArrival));
         SObjectDataLoader.clonedLocation = [SELECT Id, Name, nihrm__UnassignedFunctionRoom__c FROM nihrm__Location__c WHERE Id =: newPropertyId];
+        SObjectDataLoader.isInquiryShouldBeCloned = (isInquiryShouldBeCloned == 'true');
 
         return SObjectDataLoader.deserialize(recordsAsJSON);
     }

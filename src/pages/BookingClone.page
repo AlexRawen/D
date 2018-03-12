@@ -39,18 +39,17 @@
                 for (i = 0; i < clonesJSON.length; i++) {
                     Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.BookingClone.serialize}',
                         JSON.stringify(new Array(clonesJSON[i].booking.Id)),
-                        serializeCallback, {
-                            escape: false,
-                            buffer: false,
-                            timeout: 120000
-                        });
+                            serializeCallback,
+                            { escape: false, buffer: false, timeout: 120000 }
+                        );
                 }
-                
+            
             }
 
             function serializeCallback(result, event) {
                 
-                var recordSetBundle;
+                //not used at all 
+                //var recordSetBundle;
 
                 if (result) {
                     currentclone = bookingClones[clonesserialized];
@@ -74,6 +73,7 @@
                     bookingClones[clonesserialized - 1].booking.nihrm__Location__c,
                     clonesName,
                     oClonesIdsJSON,
+                    bookingClones[clonesserialized - 1].isInquiryShouldBeCloned,
                     deserializeCallback, {
                         escape: false,
                         buffer: false,
@@ -98,7 +98,7 @@
                         }
                         restoreInits();
                     }
-                }    
+                }
             }
 
             function rollback() {
@@ -239,11 +239,20 @@
                 <div style="background-color:light-grey" class="slds-notify slds-notify--alert slds-theme--alert-texture" role="alert">
                     <span class="slds-assistive-text">Info</span>
                     <h1><b>{!$Label.CloneBookings}</b></h1>
+                    
                 </div>
             </div>
+                <!-- MINE CODE. REMOVE IT!!!-->
+                <center>
+                    <p>
+                        <font size="4" color="red">
+                            <b>IN PROGRESS by AKalatsky</b>
+                        </font>
+                    </p>
+                </center>
+                <!-- END MINE CODE. REMOVE IT!!!-->
 
             <div class="slds-m-vertical--x-small"></div>
-            
             <apex:outputPanel id="theGrid">
                 <div class="slds-grid slds-wrap">
                     
@@ -307,7 +316,7 @@
                         <div class="slds-p-horizontal_small slds-size_1-of-7">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
-                                    <apex:inputCheckbox value="{!instance.checkBoxForInquiry}">
+                                    <apex:inputCheckbox value="{!instance.isInquiryShouldBeCloned}">
                                         <apex:actionSupport event="onclick" rerender="theGrid"/>
                                     </apex:inputCheckbox>
                                 </div>
@@ -317,7 +326,7 @@
                         <div class="slds-p-horizontal_small slds-size_1-of-7">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
-                                   <apex:outputText value="{!instance.checkBoxForInquiry}"/>
+                                   <apex:outputText value="is '{!instance.isInquiryShouldBeCloned}'"/>
                                    <!--old 
                                    &nbsp; -->
                                 </div>
@@ -330,13 +339,14 @@
                     </apex:repeat>
 
                 </div>
+
             </apex:outputPanel>
             
             <!--Progress Bar-->
             <div id="progress" class="slds-is-relative slds-hide" style="height:6rem;">
                 <div role="status" class="slds-spinner slds-spinner_brand slds-spinner_large">
                     <span class="slds-assistive-text">Loading</span>
-                    <div class="slds-spinner__dot-a"></div>
+                    <div class="slds-spinner__dot-a"></div> 
                     <div class="slds-spinner__dot-b"></div>
                 </div>
             </div>
@@ -351,9 +361,6 @@
                 </div>
             </div>
 
-            <div>
-                <apex:outputText id="msgPanel" value="{!msg}"/>
-            </div>
             <!--Buttons-->
             <div class="slds-align_absolute-center">
                 <apex:actionFunction name="resetCloneBooking" action="{!resetCloneBookings}" rerender="startCloning"/>
