@@ -302,9 +302,7 @@
                         <div class="slds-p-horizontal_small slds-size_2-of-7">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
-                                    <apex:inputField value="{!instance.booking.nihrm__Location__c}" id="BProperty" styleClass="slds-input fixlookup">
-                                        <apex:actionSupport event="onclick" rerender="theGrid"/>
-                                    </apex:inputField>
+                                    <apex:inputField value="{!instance.booking.nihrm__Location__c}" id="BProperty" styleClass="slds-input fixlookup"></apex:inputField>
                                 </div>    
                             </div>
                         </div>
