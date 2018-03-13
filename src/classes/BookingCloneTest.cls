@@ -171,7 +171,7 @@ private class BookingCloneTest {
 
         BookingClone bc = new BookingClone();
         String serializedData = BookingClone.serialize(JSON.serialize(new Set<Id>{bc.booking.Id}));
-        SObjectDataLoader.deserializeResponse response = BookingClone.deserialize(serializedData, '2020-01-02', '2020-03-01', String.ValueOf(property.Id), bc.clonesName, bc.omitClonesIdsJSON);
+        SObjectDataLoader.deserializeResponse response = BookingClone.deserialize(serializedData, '2020-01-02', '2020-03-01', String.ValueOf(property.Id), bc.clonesName, bc.omitClonesIdsJSON, 'true');
         
         //Check that result table was generated
         System.assertNotEquals(BookingClone.createResultsTable(JSON.serialize(response.records)), '');
@@ -190,7 +190,7 @@ private class BookingCloneTest {
 
         BookingClone bc = new BookingClone();
         String serializedData = BookingClone.serialize(JSON.serialize(new Set<Id>{bc.booking.Id}));
-        SObjectDataLoader.deserializeResponse response = BookingClone.deserialize(serializedData, '2020-01-02', '2020-03-01', String.ValueOf(property.Id), bc.clonesName, bc.omitClonesIdsJSON);
+        SObjectDataLoader.deserializeResponse response = BookingClone.deserialize(serializedData, '2020-01-02', '2020-03-01', String.ValueOf(property.Id), bc.clonesName, bc.omitClonesIdsJSON, 'true');
 
         String result = BookingClone.rollbackCloned(JSON.serialize(response.records));
 

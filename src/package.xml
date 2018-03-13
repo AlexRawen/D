@@ -4,6 +4,8 @@
         <members>BookingClone</members>
         <members>BookingCloneTest</members>
         <members>SObjectDataLoader</members>
+        <members>TestBookingClone</members>
+        <members>TestSObjectDataLoader</members>
         <name>ApexClass</name>
     </types>
     <types>

@@ -7,6 +7,12 @@
 * Operations    : Initialize booking clone page interface. Calls SObjectDataLoader class
 *                 to serialize and deserialize (=clone) bookings with the related objects one by one.
 *                 Generates the result table.
+*
+* Revised by    : Alexander Kalatsky
+* Revised on    : March 13th 2018
+* Description   : Added checkbox for inquiry cloning. Default value is false.
+                  If checkbox is not checked the unquiry will not be cloned.
+                  Also process "Update_Booking_Name" is updated and now correctly works if nihrm__Inquiry__c is null.
 */
 
 public with sharing class BookingClone {
@@ -140,12 +146,10 @@ public with sharing class BookingClone {
     }
 
     public class BookingCloneInstance{
-        //mcode
         public boolean isInquiryShouldBeCloned{get; set;}
         public nihrm__Booking__c booking{get; set;}
 
         public BookingCloneInstance(nihrm__Booking__c booking){
-            //mcode
             isInquiryShouldBeCloned = false;
             this.booking = booking;  
         }

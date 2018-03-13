@@ -5,6 +5,11 @@
 * Description   : Interface for the booking clone functionality. Uses SLDS styles.
 * Dependencies  : BookingClone.cls
 * Operations    : Calls remote actions to invoke clone process.
+*
+* Revised by    : Alexander Kalatsky
+* Revised on    : March 13th 2018
+* Description   : Added checkbox for inquiry cloning. Default value is false.
+                  If checkbox is not checked the unquiry will not be cloned.
 *-->
 
 <apex:page controller="BookingClone" showHeader="false" sidebar="false" id="mainWindow" title="Booking Clone">
@@ -48,8 +53,7 @@
 
             function serializeCallback(result, event) {
                 
-                //not used at all 
-                //var recordSetBundle;
+                var recordSetBundle;
 
                 if (result) {
                     currentclone = bookingClones[clonesserialized];
@@ -232,7 +236,6 @@
                 min-height: initial;
             }
         </style>
-
         <apex:form id="theForm">
 
             <div class="slds-notify_container slds-is-relative" style="z-index: 5">
@@ -242,19 +245,10 @@
                     
                 </div>
             </div>
-                <!-- MINE CODE. REMOVE IT!!!-->
-                <center>
-                    <p>
-                        <font size="4" color="red">
-                            <b>IN PROGRESS by AKalatsky</b>
-                        </font>
-                    </p>
-                </center>
-                <!-- END MINE CODE. REMOVE IT!!!-->
 
             <div class="slds-m-vertical--x-small"></div>
-            <apex:outputPanel id="theGrid">
-                <div class="slds-grid slds-wrap">
+            <apex:outputPanel id="theGrid" rendered="{! NOT(ISNULL(bookingIdAsJSON))}">
+                <div class="slds-grid slds-wrap slds-grid_vertical-align-center">
                     
                     <div class="slds-p-horizontal_small slds-size_1-of-7">
                         <div class="slds-form-element">
@@ -274,7 +268,7 @@
                     </div>
                     <div class="slds-p-horizontal_small slds-size_1-of-7">
                         <div class="slds-form-element">
-                            <label class="slds-form-element__label" for="text-input-id-1">&nbsp;</label>
+                            <label class="slds-form-element__label" for="text-input-id-1">Is inquiry should be cloned</label>
                         </div>
                     </div>
                     <div class="slds-p-horizontal_small slds-size_1-of-7">
@@ -308,27 +302,31 @@
                         <div class="slds-p-horizontal_small slds-size_2-of-7">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
-                                    <apex:inputField value="{!instance.booking.nihrm__Location__c}" id="BProperty" styleClass="slds-input fixlookup"></apex:inputField>
+                                    <apex:inputField value="{!instance.booking.nihrm__Location__c}" id="BProperty" styleClass="slds-input fixlookup">
+                                        <apex:actionSupport event="onclick" rerender="theGrid"/>
+                                    </apex:inputField>
                                 </div>    
                             </div>
                         </div>
-                        <!--mine colunm for checkbox-->
+
+                        <!-- clone inquiry column -->
                         <div class="slds-p-horizontal_small slds-size_1-of-7">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
-                                    <apex:inputCheckbox value="{!instance.isInquiryShouldBeCloned}">
-                                        <apex:actionSupport event="onclick" rerender="theGrid"/>
-                                    </apex:inputCheckbox>
+                                    <label class="slds-checkbox">
+                                        <apex:inputcheckbox styleclass="slds-input" value="{!instance.isInquiryShouldBeCloned}"/>
+                                        <span class="slds-checkbox--faux"></span>
+                                    </label>
                                 </div>
                             </div>
                         </div>
 
+
+
                         <div class="slds-p-horizontal_small slds-size_1-of-7">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
-                                   <apex:outputText value="is '{!instance.isInquiryShouldBeCloned}'"/>
-                                   <!--old 
-                                   &nbsp; -->
+                                   &nbsp; 
                                 </div>
                             </div>
                         </div>
@@ -362,14 +360,16 @@
             </div>
 
             <!--Buttons-->
-            <div class="slds-align_absolute-center">
-                <apex:actionFunction name="resetCloneBooking" action="{!resetCloneBookings}" rerender="startCloning"/>
-                <apex:commandButton styleclass="slds-button slds-button--neutral" id="cloneButton" value="Clone" action="{!cloneBookings}" onclick="toogleButtons(true)" oncomplete="resetCloneBooking();" rerender="theForm" />
-                <apex:commandButton styleclass="slds-button slds-button--neutral" id="moreButton" value="Add More" action="{!addMore}" oncomplete="checkAddMore({!clones.size})" rerender="theGrid">
-                    <apex:param name="newClones" value="1" assignTo="{!numOfClones}"/>
-                </apex:commandButton>
-                <apex:commandButton styleclass="slds-button slds-button--neutral" id="cancelButton" value="Cancel" action="{!cancel}" />
-            </div>
+            <apex:outputPanel id="theButtons" rendered="{! NOT(ISNULL(bookingIdAsJSON))}">
+                <div class="slds-align_absolute-center">
+                    <apex:actionFunction name="resetCloneBooking" action="{!resetCloneBookings}" rerender="startCloning"/>
+                    <apex:commandButton styleclass="slds-button slds-button--neutral" id="cloneButton" value="Clone" action="{!cloneBookings}" onclick="toogleButtons(true)" oncomplete="resetCloneBooking();" rerender="theForm" />
+                    <apex:commandButton styleclass="slds-button slds-button--neutral" id="moreButton" value="Add More" action="{!addMore}" oncomplete="checkAddMore({!clones.size})" rerender="theGrid">
+                        <apex:param name="newClones" value="1" assignTo="{!numOfClones}"/>
+                    </apex:commandButton>
+                    <apex:commandButton styleclass="slds-button slds-button--neutral" id="cancelButton" value="Cancel" action="{!cancel}" />
+                </div>
+            </apex:outputPanel>
 
              <!--Clone Results-->
             <div class="slds-text-align_center slds-hide" id="cloneresult"></div>

@@ -436,12 +436,9 @@ public with sharing class SObjectDataLoader
         String objName = sObj.getSObjectType().getDescribe().getName().toLowerCase();
         
         if(fieldsCopyByObject.containsKey(objName)){
-
-            // чем Global отличается от не Global
-            // т.е. почему нельзя SObjectType objType = sObj.getSObjectType();
+            
             SObjectType objType = Schema.getGlobalDescribe().get(objName);
             Map<String, Schema.SObjectField> describeMap = objType.getDescribe().fields.getMap();
-            //пробегает по всем полям sObj
             for(String fieldName : describeMap.keySet()) {
                 if(describeMap.get(fieldName).getDescribe().isUpdateable()) {
                     
@@ -478,9 +475,7 @@ public with sharing class SObjectDataLoader
             if(objName == 'nihrm__bookingevent__c'){
                 sObj.put('nihrm__functionroom__c', clonedLocation.nihrm__UnassignedFunctionRoom__c);
             }
-            //вот это должно срабатывать только если стоит галочка
-            //if(objName == 'nihrm__booking__c' && isInquiryShouldBeCloned){
-            if(objName == 'nihrm__booking__c'){
+            if(objName == 'nihrm__booking__c' && isInquiryShouldBeCloned){
                 sObj.put('nihrm__inquiry__c', createPrimaryInquiry((nihrm__Booking__c)sObj));
             }
         }
