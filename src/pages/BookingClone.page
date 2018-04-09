@@ -250,28 +250,23 @@
             <apex:outputPanel id="theGrid" rendered="{! NOT(ISNULL(bookingIdAsJSON))}">
                 <div class="slds-grid slds-wrap slds-grid_vertical-align-center">
                     
-                    <div class="slds-p-horizontal_small slds-size_1-of-7">
+                    <div class="slds-p-horizontal_small slds-size_1-of-6">
                         <div class="slds-form-element">
                             <label class="slds-form-element__label" for="text-input-id-1">&nbsp;</label>
                         </div>
                     </div>
 
-                    <div class="slds-p-horizontal_small slds-size_2-of-7">
+                    <div class="slds-p-horizontal_small slds-size_2-of-6">
                         <div class="slds-form-element">
                             <label class="slds-form-element__label" for="text-input-id-1">Select Arrival Date for new booking</label>
                         </div>
                     </div>
-                    <div class="slds-p-horizontal_small slds-size_2-of-7">
+                    <div class="slds-p-horizontal_small slds-size_2-of-6">
                         <div class="slds-form-element">
                             <label class="slds-form-element__label" for="text-input-id-1">Select Location for new booking</label>
                         </div>
                     </div>
-                    <div class="slds-p-horizontal_small slds-size_1-of-7">
-                        <div class="slds-form-element">
-                            <label class="slds-form-element__label" for="text-input-id-1">Is inquiry should be cloned</label>
-                        </div>
-                    </div>
-                    <div class="slds-p-horizontal_small slds-size_1-of-7">
+                    <div class="slds-p-horizontal_small slds-size_1-of-6">
                         <div class="slds-form-element">
                             <label class="slds-form-element__label" for="text-input-id-1">&nbsp;</label>
                         </div>
@@ -281,7 +276,7 @@
                    
                     <apex:repeat var="instance" value="{!clones}" >
                         
-                        <div class="slds-p-horizontal_small slds-size_1-of-7">
+                        <div class="slds-p-horizontal_small slds-size_1-of-6">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
                                    &nbsp;
@@ -290,7 +285,7 @@
                         </div>
 
                         <!-- arrival column -->
-                        <div class="slds-p-horizontal_small slds-size_2-of-7">
+                        <div class="slds-p-horizontal_small slds-size_2-of-6">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
                                     <apex:inputField value="{!instance.booking.nihrm__CutoffDate__c}" id="BArrival" styleClass="slds-input"></apex:inputField>
@@ -299,7 +294,7 @@
                         </div>
 
                         <!-- location column -->
-                        <div class="slds-p-horizontal_small slds-size_2-of-7">
+                        <div class="slds-p-horizontal_small slds-size_2-of-6">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
                                     <apex:inputField value="{!instance.booking.nihrm__Location__c}" id="BProperty" styleClass="slds-input fixlookup"></apex:inputField>
@@ -307,21 +302,7 @@
                             </div>
                         </div>
 
-                        <!-- clone inquiry column -->
-                        <div class="slds-p-horizontal_small slds-size_1-of-7">
-                            <div class="slds-form-element">
-                                <div class="slds-form-element__control">
-                                    <label class="slds-checkbox">
-                                        <apex:inputcheckbox styleclass="slds-input" value="{!instance.isInquiryShouldBeCloned}"/>
-                                        <span class="slds-checkbox--faux"></span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-
-
-                        <div class="slds-p-horizontal_small slds-size_1-of-7">
+                        <div class="slds-p-horizontal_small slds-size_1-of-6">
                             <div class="slds-form-element">
                                 <div class="slds-form-element__control">
                                    &nbsp; 
@@ -337,6 +318,18 @@
                 </div>
 
             </apex:outputPanel>
+
+            <!-- Inquiry checkox--> 
+            <div class="slds-form-element__control slds-align_absolute-center">
+                <label class="slds-checkbox">
+                    <apex:inputcheckbox styleclass="slds-input" value="{!isInquiryShouldBeCloned}"/>
+                    <span class="slds-checkbox--faux"></span>
+                    <span class="slds-form-element__label">Create inquiry for cloned booking.</span>
+                </label>
+            </div>
+
+            <div class="slds-m-vertical--medium"></div>
+
             
             <!--Progress Bar-->
             <div id="progress" class="slds-is-relative slds-hide" style="height:6rem;">

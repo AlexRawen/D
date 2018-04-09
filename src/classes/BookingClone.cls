@@ -17,6 +17,14 @@
 
 public with sharing class BookingClone {
     
+    public Boolean isInquiryShouldBeCloned{get;
+        set{
+            for(BookingCloneInstance b : clones){
+                b.isInquiryShouldBeCloned = value;
+            }
+            isInquiryShouldBeCloned = value;
+        }
+    }
     //The number of new clone instancies to add to the list when the user clicks 'Add More'
     public Integer numOfClones{get;set{numOfClones = value;}}
     //List of the cloned instancies - populated on demand
@@ -191,7 +199,7 @@ public with sharing class BookingClone {
         SObjectDataLoader.omitClonesIdsJSON = (Set<Id>)JSON.deserialize(omitClonesIds, Set<Id>.class);
         SObjectDataLoader.shiftDays = Date.ValueOf(originalArrival).daysBetween(Date.ValueOf(newArrival));
         SObjectDataLoader.clonedLocation = [SELECT Id, Name, nihrm__UnassignedFunctionRoom__c FROM nihrm__Location__c WHERE Id =: newPropertyId];
-        SObjectDataLoader.isInquiryShouldBeCloned = (isInquiryShouldBeCloned == 'true');
+        SObjectDataLoader.isInquiryShouldBeCloned = Boolean.valueOf(isInquiryShouldBeCloned);//(isInquiryShouldBeCloned == 'true');
 
         return SObjectDataLoader.deserialize(recordsAsJSON);
     }
